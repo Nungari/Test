@@ -1,0 +1,262 @@
+---
+title: "ANOVA ASSIGNMENT"
+author: "TABITHA NUNGARI"
+date: "7 May 2019"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(tidyr)
+```
+
+#QUESTION 1
+```{r}
+LowCalorie<-c(8,9,6,7,3)
+LowFat<-c(2,4,3,5,1)
+LowCarb<-c(3,5,4,2,3)
+Control<-c(2,2,-1,0,3)
+WeightLoss<-data.frame(LowCalorie,LowFat,LowCarb,Control)
+
+#STEP1: SETTING HYPOTHESIS
+#Ho:U1=U2=U3=U4=0
+#Ha:U1=U2=U3=U4!=0
+
+#STEP2:CONFIDENCE LEVEL=95%
+
+#STEP 3: FCALC
+#K=4
+#N=20
+#n1=5
+#n2=5
+#n3=5
+#n4=5
+
+Y1=mean(WeightLoss$LowCalorie)
+Y2=mean(WeightLoss$LowFat)
+Y3=mean(WeightLoss$LowCarb)
+Y4=mean(WeightLoss$Control)
+
+WeightLoss_Long<-WeightLoss %>% 
+  gather("Groups","WeightDiff",LowCarb,LowFat,LowCalorie,Control)
+
+Ysum=sum(WeightLoss_Long$WeightDiff)
+Y=(Ysum/20)
+
+
+SST1=(5*((Y1-Y)^2))
+SST2=(5*((Y2-Y)^2))
+SST3=(5*((Y3-Y)^2))
+SST4=(5*((Y4-Y)^2))
+SST=(SST1+SST2+SST3+SST4)
+
+SSE1<-WeightLoss_Long %>% 
+  group_by(Groups) %>% 
+  mutate(mean(WeightDiff)) %>% 
+  mutate(Diff=((WeightDiff-mean(WeightDiff))^2))
+
+SSE=sum(SSE1$Diff)
+
+MST=(SST/3)
+MSE=(SSE/16)
+
+FCALC=(MST/MSE)
+
+#STEP 4: qf
+
+qf(0.95,3,16)
+
+summary(aov(WeightDiff~Groups,data = WeightLoss_Long))
+
+#CONCLUSION
+#We fail to reject the null hypothesis, we are 95% confident that there is a significant difference in the mean weight loss among the four diets.
+
+
+```
+
+#QUESTION 2
+```{r}
+NormalBD<-c(1200,1000,980,900,750,800)
+Osteopenia<-c(1000,1100,700,800,500,700)
+Osteoporosis<-c(890,650,1100,900,400,350)
+CalciumIntake<-data.frame(NormalBD,Osteopenia,Osteoporosis)
+
+
+#STEP1: SETTING HYPOTHESIS
+#Ho:U1=U2=U3=0
+#Ha:U1=U2=U3!=0
+
+#STEP2:CONFIDENCE LEVEL=95%
+
+#STEP 3: FCALC
+#K=3
+#N=18
+#n1=6
+#n2=6
+#n3=6
+
+Yc1=mean(CalciumIntake$NormalBD)
+Yc2=mean(CalciumIntake$Osteopenia)
+Yc3=mean(CalciumIntake$Osteoporosis)
+
+CalciumIntake_Long<-CalciumIntake %>% 
+  gather("Groups","Intake",NormalBD,Osteopenia,Osteoporosis)
+
+Ycsum=sum(CalciumIntake_Long$Intake)
+Yc=(Ycsum/18)
+
+
+SSTc1=(6*((Yc1-Yc)^2))
+SSTc2=(6*((Yc2-Yc)^2))
+SSTc3=(6*((Yc3-Yc)^2))
+
+SSTc=(SSTc1+SSTc2+SSTc3)
+
+SSEc1<-CalciumIntake_Long %>% 
+  group_by(Groups) %>% 
+  mutate(mean(Intake)) %>% 
+  mutate(Diff=((Intake-mean(Intake))^2))
+
+SSEc=sum(SSEc1$Diff)
+
+MSTc=(SSTc/2)
+MSEc=(SSEc/15)
+
+FCALCc=(MSTc/MSEc)
+
+#STEP 4: qf
+
+qf(0.95,2,15)
+
+summary(aov(Intake~Groups,data = CalciumIntake_Long))
+
+#CONCLUSION: we reject the null hypothesis and are 95% confident that there is a statistically significant difference in mean calcium intake in patients with normal bone density as compared to patients with osteopenia and osteoporosis
+
+```
+
+#QUESTION 3
+```{r}
+CompactCars<-c(643,655,702)
+MidsizeCars<-c(469,427,525)
+FullsizeCars<-c(484,456,402)
+
+NTSB<-data.frame(CompactCars,MidsizeCars,FullsizeCars)
+
+#STEP1: SETTING HYPOTHESIS
+#Ho:U1=U2=U3=0
+#Ha:U1=U2=U3!=0
+
+#STEP2:CONFIDENCE LEVEL=95%
+
+#STEP 3: FCALC
+#K=3
+#N=9
+#n1=3
+#n2=3
+#n3=3
+
+Yp1=mean(NTSB$CompactCars)
+Yp2=mean(NTSB$MidsizeCars)
+Yp3=mean(NTSB$FullsizeCars)
+
+NTSB_Long<-NTSB %>% 
+  gather("CarType","PressureValue",CompactCars,MidsizeCars,FullsizeCars)
+
+Yp<-mean(NTSB_Long$PressureValue)
+
+SSTp1<-(3*((Yp1-Yp)^2))
+SSTp2<-(3*((Yp2-Yp)^2))
+SSTp3<-(3*((Yp3-Yp)^2))
+
+SSTp<-(SSTp1+SSTp2+SSTp3)
+
+SSEp1<-NTSB_Long %>% 
+  group_by(CarType) %>% 
+  mutate(Mean=mean(PressureValue)) %>% 
+  mutate(Diff=((PressureValue-mean(PressureValue))^2))
+
+SSEp=sum(SSEp1$Diff)
+
+MSTp=(SSTp/2)
+MSEp=(SSEp/6)
+
+Fcalcp<-(MSTp/MSEp)
+
+#qf
+qf(0.95,2,6)
+
+summary(aov(PressureValue~CarType, data=NTSB_Long))
+
+#CONCLUSION: We reject the null hypothesis and are 95% confident that the mean pressure applied to the driver's head during a crash test is not equal for each type of car.
+
+
+```
+
+#QUESTION 4
+```{r}
+Group1<-c(51,45,33,45,67)
+Group2<-c(23,43,23,43,45)
+Group3<-c(56,76,74,87,56)
+
+Groups<-data.frame(Group1,Group2,Group3)
+
+Groups_Long<-Groups %>% 
+  gather("Groups","Values",Group1,Group2,Group3)
+
+#STEP 1: SETTING HYPOTHESIS
+#Ho:U1=U2=U3=0
+#Ha:U1=U2=U3!=0
+
+#STEP 2: CONFIDENCE LEVEL=95%
+
+
+#STEP 3: FCALC
+
+#K=3
+#N=15
+#n1=5
+#n2=5
+#n3=5
+
+Yng<-Groups_Long %>% 
+  group_by(Groups) %>% 
+  summarise(mean(Values))
+
+Yg=mean(Groups_Long$Values)
+
+#Y1=48.2
+#Y2=35.4
+#Y3=69.3
+
+
+SSTg1<-(5*((48.2-Yg)^2))
+SSTg2<-(5*((35.4-Yg)^2))
+SSTg3<-(5*((69.3-Yg)^2))
+
+SSTg<-(SSTg1+SSTg2+SSTg3)
+
+SSEg1<-Groups_Long %>% 
+  group_by(Groups) %>% 
+  mutate(Mean=mean(Values)) %>% 
+  mutate(Diff=((Values-Mean)^2))
+
+SSEg<-sum(SSEg1$Diff)
+
+MSTg<-(SSTg/2)
+MSEg<-(SSEg/12)
+
+fCALCg<-(MSTg/MSEg)
+
+#STEP 4: qf
+qf(0.95,2,12)
+
+summary(aov(Values~Groups, data=Groups_Long))
+
+#CONCLUSION:We reject the null hypothesis since Fcalc>qf thus lying in the rejection area.
+
+
+```
+
+
+
+
